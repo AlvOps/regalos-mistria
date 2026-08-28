@@ -111,6 +111,15 @@ h1 em{font-style:normal;color:var(--bloom)}
 html[data-theme="dark"] .artswitch button[aria-pressed="true"]{color:#241a2c}
 .artswitch button:focus-visible{outline:2px solid var(--bloom);outline-offset:2px}
 
+#home{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-family:"Fredoka",sans-serif;
+  font-size:13px;background:var(--panel);border:2px solid var(--edge);color:var(--ink);
+  border-radius:999px;padding:6px 14px;cursor:pointer;transition:.14s}
+#home:hover{border-color:var(--bloom);color:var(--bloom)}
+#home:focus-visible{outline:2px solid var(--bloom);outline-offset:2px}
+#home[hidden]{display:none}
+#home svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+
 .roster{margin-top:30px}
 .roster h2{font-family:"Fredoka",sans-serif;font-weight:500;font-size:12px;letter-spacing:.2em;
   text-transform:uppercase;color:var(--dim);margin:0 0 12px}
@@ -171,6 +180,7 @@ details h4{font-family:"Fredoka",sans-serif;font-weight:500;font-size:12px;lette
   .gifts{grid-template-columns:1fr}
   .name-chip,.who button{min-height:42px}
   .theme{padding:9px 14px;min-height:42px}
+  #home{margin-left:0;width:100%;justify-content:center;min-height:42px}
   .sg{padding:13px 14px}
   .suggest{max-height:min(340px,45vh)}
   .card h3 .sprite{width:32px;height:32px}
@@ -232,6 +242,10 @@ details h4{font-family:"Fredoka",sans-serif;font-weight:500;font-size:12px;lette
     <button id="art-wiki" aria-pressed="true">Del juego</button>
     <button id="art-svg" aria-pressed="false">Dibujados</button>
     <span id="art-note">Buscando los sprites…</span>
+    <button id="home" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 10.8 12 3.6l8.4 7.2"/><path d="M5.8 9.6v9.6a1.2 1.2 0 0 0 1.2 1.2h10a1.2 1.2 0 0 0 1.2-1.2V9.6"/></svg>
+      Volver al inicio
+    </button>
   </div>
 </header>
 
@@ -331,8 +345,11 @@ function whoBlock(title, cls, names){
 
 let view = {kind:"roster", key:null};
 
+function toggleHome(on){ el("home").hidden = !on; }
+
 function showRoster(){
   view = {kind:"roster", key:null};
+  toggleHome(false);
   res.innerHTML = '<section class="roster"><h2>Los 34 vecinos</h2><div class="names"></div></section>';
   const r = res.querySelector(".names");
   for (const c of CH){
@@ -347,6 +364,7 @@ function showChar(name){
   const c = CH.find(x => x.n === name);
   if (!c) return;
   view = {kind:"char", key:name};
+  toggleHome(true);
   res.innerHTML = '<article class="card"><h3>'+face(c)+esc(c.n)+'</h3><p class="flavor">'+esc(c.d)+'</p>'+
     tier("Le encantan","+20 pts","t-loved",c.loved)+
     tier("Le gustan","+10 pts","t-liked",c.liked)+
@@ -358,6 +376,7 @@ function showItem(es){
   const it = ITEMS.get(es);
   if (!it) return;
   view = {kind:"item", key:es};
+  toggleHome(true);
   res.innerHTML = '<article class="card"><h3>'+art(it.cat, it.file)+esc(it.es)+'</h3>'+
     '<p class="flavor">'+esc(CAT[it.cat]||"Objeto")+' · en inglés: '+esc(it.en)+'</p>'+
     whoBlock("Les encanta","t-loved",it.loved)+
@@ -440,6 +459,12 @@ function setArt(on, msg){
   if (q.value){ hits = search(q.value); render(); }
   redraw();
 }
+el("home").onclick = () => {
+  q.value = ""; clearBtn.hidden = true; hide();
+  showRoster();
+  window.scrollTo({top:0, behavior:"smooth"});
+};
+
 el("art-wiki").onclick = () => setArt(true);
 el("art-svg").onclick  = () => setArt(false);
 
